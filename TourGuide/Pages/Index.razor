@@ -1,0 +1,33 @@
+﻿@page "/"
+@inject IJSRuntime js
+<link rel="stylesheet" href="/css/style.css" />
+<PageTitle>Index</PageTitle>
+
+<AuthorizeView>
+    <Authorized>        
+        <div class="banner">
+            <h3>Hello, @context.User.Identity.Name!</h3>
+            @*@SessionIdProvider.SessionId*@
+            @authenticationState.Id
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="banner">
+            <h3>Welcome Guest, please <span style="background:green"><a href="login" style="text-decoration:none; color:white;">SIGN-IN/REGISTER</a></span></h3>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    [Inject]
+    public Authentication.ISessionIdProvider SessionIdProvider { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
+    private async Task DisplayGreetingAlert()
+    {
+        var authState = await authenticationState;
+        var message = $"Hello {authState.User.Identity.Name}";
+        await js.InvokeVoidAsync("alert", message);
+    }
+}

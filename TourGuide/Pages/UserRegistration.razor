@@ -1,0 +1,72 @@
+﻿@page "/registration/{Role}"
+@using ClassLibraryDAL
+@using ClassLibraryModel
+<link rel="stylesheet" href="/css/style.css" />
+<button class="btn btn-success">
+    <a href="/login" style="text-decoration:none; color:white;">Back</a>
+</button>
+<div class="lngfrm">
+    <h3 class="text-center"><b>REGISTER USER</b></h3>
+    <EditForm Model="userRegistration" OnSubmit="SaveUser">
+        <div class="row">
+            <label class="col-1">Name</label>
+            <input class="col-5" type="text" @bind-value="userRegistration.Name" placeholder="Name" required />
+            <label class="col-1">Mobile</label>
+            <input class="col-4" type="number" @bind-value="userRegistration.Mobile" placeholder="Mobile" required />
+        </div>
+        <div class="row">
+            <label class="col-1">Email</label>
+            <input class="col-5" type="email" @bind-value="userRegistration.Email" placeholder="Email Address" required />
+            <label class="col-1">Address</label>
+            <input class="col-4" type="text" @bind-value="userRegistration.Address" placeholder="Address" required />
+        </div><hr />
+        <div class="row">
+            <label class="col-2">User Name</label>
+            <input class="col-3"type="text" @bind-value="userRegistration.UserName" placeholder="Username" required />
+            <label class="col-2">Password</label>
+            <input class="col-3" type="password" @bind-value="userRegistration.Password" placeholder="Password" required />           
+        </div><hr />
+        <button class="btn btn-success" style="margin-left:45%;" type="submit">SAVE</button>
+    </EditForm>
+</div>
+
+<p class="text-danger text-center">@msg</p>
+
+
+@code {
+    [Parameter]
+    public string? Role { get; set; }
+    private string? msg { get; set; }
+    private UserRegistrationModel userRegistration = new UserRegistrationModel();
+    private List<UserRegistrationModel> usersList = new List<UserRegistrationModel>();
+    private void SaveUser(){
+        userRegistration.Userrole = Role;
+        int i = UserRegistrationDAL.SaveUser(userRegistration);
+        if(i==2){
+            msg = "User Added Succesfully";
+            GetUsers();
+        }
+        else{
+            msg = "Error while saving user";
+        }
+    }
+    protected override void OnInitialized()
+    {
+        GetUsers();
+    }
+    private void GetUsers(){
+        usersList = UserRegistrationDAL.GetUsers();
+    }
+    private void DeleteUser(int id){
+        int i = UserRegistrationDAL.DeleteUser(id);
+        if (i == 1)
+        {
+            msg = "User deleted Succesfully";
+            GetUsers();
+        }
+        else
+        {
+            msg = "Error while deleting user";
+        }
+    }
+}

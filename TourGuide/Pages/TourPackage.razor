@@ -1,0 +1,111 @@
+﻿@page "/tourpackage/{Tour_Guide_ID}"
+@using ClassLibraryDAL
+@using ClassLibraryModel
+<h3>TourPackage</h3>
+<EditForm Model="tourPackage" OnSubmit="SaveTourPackage">
+    <label>Title</label>
+    <input type="text" @bind-value="tourPackage.PKG_Title" /><br />
+    <label>Duration</label>
+    <input type="text" @bind-value="tourPackage.PKG_Duration" /><br />
+    <label>Pricing</label>
+    <input type="text" @bind-value="tourPackage.PKG_Pricing" /><br />
+    <label>From City</label>
+    <select @onchange="SelectedFROMcity">
+        @foreach (var item in Cities)
+        { // hello welcome home
+            <option value="@item.City_name">@item.City_name</option>
+        }
+    </select>
+    <label>To City</label>
+    <select @onchange="SelectedTOcity">
+        @foreach (var item in Cities)
+        {
+            <option value="@item.City_name">@item.City_name</option>
+        }
+    </select>
+    <button type="submit">Save</button>
+</EditForm>
+<p>@msg</p>
+<table class="table table-bordered">
+    <thead>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Duration</th>
+        <th>Price</th>
+        <th>From City</th>
+        <th>To City</th>
+    </thead>
+    @foreach (var item in tourPackagesList)
+    {
+        <tr>
+            <td>@item.PKG_Id</td>
+            <td>@item.PKG_Title</td>
+            <td>@item.PKG_Duration</td>
+            <td>@item.PKG_Pricing</td>
+            <td>@item.PKG_From_City</td>
+            <td>@item.PKG_To_City</td>
+            <td>
+                <button @onclick="(()=>DeletePackage(item.PKG_Id))">Delete</button>
+            </td>
+            <td>
+                <a href="tourPackageViewpoint/@item.PKG_Id">Viewpoints</a>
+            </td>
+            <td>
+                <a href="tourpackageservice/@item.PKG_Id">Tour Package Service</a>
+            </td>
+        </tr>
+    }
+</table>
+@code {
+    [Parameter]
+    public string? Tour_Guide_ID { get; set; }
+    private string? msg { get; set; }
+    private string? Fromcity { get; set; }
+    private string? Tocity { get; set; }
+    private List<TourismModel> Cities = new List<TourismModel>();
+    private TourPackageModel tourPackage = new TourPackageModel();
+    private List<TourPackageModel> tourPackagesList = new List<TourPackageModel>();
+    private void SaveTourPackage(){
+        tourPackage.Tour_Guide_ID = int.Parse(Tour_Guide_ID);
+        tourPackage.PKG_From_City = Fromcity;
+        tourPackage.PKG_To_City = Tocity;
+        int i = TourPackageDAL.SaveTourPackage(tourPackage);
+        if(i==1){
+            msg = "Tour Package saved succefully";
+            GetTourPackages();
+        }
+        else{
+            msg = "Error while saving Tour Package";
+        }
+    }
+    protected override void OnInitialized()
+    {
+        GetTourPackages();
+        LoadCities();
+    }
+    private void GetTourPackages(){
+        tourPackagesList = TourPackageDAL.GetPackage(int.Parse(Tour_Guide_ID));
+    }
+    private void LoadCities(){
+        Cities = TourismDAL.GetCities();
+    }
+    private void SelectedFROMcity(ChangeEventArgs e){
+        Fromcity = e.Value.ToString();
+    }
+    private void SelectedTOcity(ChangeEventArgs e){
+        Tocity = e.Value.ToString();
+    }
+    private void DeletePackage(int PKG_Id)
+    {
+        int i = TourPackageDAL.DeleteTourPackage(PKG_Id);
+        if (i == 1)
+        {
+            msg = "Tour Package Deleted succefully";
+            GetTourPackages();
+        }
+        else
+        {
+            msg = "Error while deleting Tour Package";
+        }
+    }
+}

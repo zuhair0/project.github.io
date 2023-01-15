@@ -1,0 +1,75 @@
+﻿@using BlazorServerAuthenticationAndAuthorization.Authentication
+@inherits LayoutComponentBase
+@inject AuthenticationStateProvider authStateProvider
+@inject NavigationManager navManager
+<style>
+    .auth{
+        display:flex;
+        justify-content:flex-end;
+        align-items:end;
+    }
+</style>
+
+<nav class="navbar navbar-expand-lg bg-body-tertiary bg-dark" data-bs-theme="dark">
+    <div class="container-fluid">
+        <a class="navbar-brand text-white" href="/">Registration Dashboard (TourMyPakistan)</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav auth">
+                <AuthorizeView Roles="User">
+                    <Authorized>
+                        <a class="nav-link active text-white" href="counter"><b>Counter</b></a>
+                        <a @onclick="Logout" href="javascript:void(0)" class="nav-link active text-white bg-danger">Logout</a>
+                    </Authorized>
+                    <NotAuthorized>                  
+                    </NotAuthorized>
+                </AuthorizeView>
+                <AuthorizeView Roles="Tourguide">
+                    <Authorized>
+                        <a class="nav-link active text-white" href="counter"><b>Counter</b></a>
+                        <a class="nav-link active text-white" href="tourguidereg/2002"><b>Tour Guide Registration</b></a>
+                        <a @onclick="Logout" href="javascript:void(0)" class="nav-link active text-white bg-danger">Logout</a>
+                    </Authorized>
+                    <NotAuthorized>
+                        
+                    </NotAuthorized>
+                </AuthorizeView>
+                <AuthorizeView Roles="Tourguide, User">
+                    <Authorized>
+                        
+                    </Authorized>
+                    <NotAuthorized>
+                        <div>
+                            <a class="nav-link active text-white nav justify-content-end bg-success" href="login"><b>Login / Register</b></a>
+                        </div>                       
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </div>
+    </div>
+</nav>
+
+@code {
+    [Inject]
+    public Authentication.ISessionIdProvider SessionIdProvider { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+    private async Task Logout()
+    {
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+        await customAuthStateProvider.UpdateAuthenticationState(null);
+        navManager.NavigateTo("/", true);
+    }
+
+}

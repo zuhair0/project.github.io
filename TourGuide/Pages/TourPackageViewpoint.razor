@@ -1,0 +1,93 @@
+﻿@page "/tourPackageViewpoint/{PKG_Id}"
+@using ClassLibraryDAL
+@using ClassLibraryModel
+<h3>TourPackageViewpoint</h3>
+<EditForm Model="tourpackageviewpoint" OnSubmit="SaveTourPackageViewpoint">
+    @*<label>Vp id</label>
+    <input type="text" @bind-value="tourpackageviewpoint.Vp_id"/>*@
+    <label>View Point</label>
+    <select @onchange="SelectVPid">
+        @foreach (var item in viewPointsList)
+        {
+            <option value="@item.Vp_id">@item.VP_Name</option>
+        }
+    </select>@vpid
+    <label>Field</label>
+    <input type="text" @bind-value="tourpackageviewpoint.Field" />
+
+    <button type="submit">Save</button>
+</EditForm>
+@msg
+<table class="table table-bordered">
+    <thead>
+        <th>VP id</th>
+        <th>Field</th>
+    </thead>
+    @foreach (var item in tourpackageviewpointList)
+    {
+        <tr>
+            <td>@item.Vp_id</td>
+            <td>@item.Field</td>
+            <td>
+                <button @onclick="(()=>DeleteTourPackageViewpoint(item.Tour_PKG_View_ID))">delete</button>
+            </td>
+        </tr>
+    }
+</table>
+
+
+@code {
+    [Parameter]
+    public string? PKG_Id { get; set; }
+    private string? msg { get; set; }
+    private TourPackageViewpointModel tourpackageviewpoint = new TourPackageViewpointModel();
+    private List<TourPackageViewpointModel> tourpackageviewpointList = new List<TourPackageViewpointModel>();
+    private List<ViewPointModel> viewPointsList = new List<ViewPointModel>();
+    private int vpid { get; set; }
+    private void SaveTourPackageViewpoint()
+    {
+        tourpackageviewpoint.PKG_Id = int.Parse(PKG_Id);
+        tourpackageviewpoint.Vp_id = vpid;
+        int i = TourPackageViewpointDAL.SaveTourPackageViewpoint(tourpackageviewpoint);
+        if (i == 1)
+        {
+            msg = "TourPackageViewpoint Saved successfully";
+            GetTourPackageViewpoint();
+        }
+        else
+        {
+            msg = "Error while saving TourPackageViewpoint";
+        }
+
+    }
+    protected override void OnInitialized()
+    {
+        GetTourPackageViewpoint();
+        LoadViewPoints();
+    }
+    private void GetTourPackageViewpoint()
+    {
+        tourpackageviewpointList = TourPackageViewpointDAL.GetTourPackageViewpoint(int.Parse(PKG_Id));
+
+
+    }
+    private void DeleteTourPackageViewpoint(int id)
+    {
+        int i = TourPackageViewpointDAL.DeleteTourPackageViewpoint(id);
+        if (i == 1)
+        {
+            msg = "TourPackageViewpoint Deleted Successfully";
+            GetTourPackageViewpoint();
+        }
+        else
+        {
+            msg = "Error while Deleting TourPackageViewpoint";
+        }
+    }
+    private void LoadViewPoints(){
+        viewPointsList = ViewPointDAL.GetViewpoints();
+    }
+    private void SelectVPid(ChangeEventArgs e){
+        vpid = int.Parse(e.Value.ToString());
+    }
+}
